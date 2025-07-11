@@ -1,0 +1,249 @@
+﻿T-512
+DDL Script
+
+
+
+
+ CREATE SCHEMA Hospital;
+SET SEARCH_PATH TO Hospital;
+
+
+create table Department(
+        Department_ID varchar(10),
+        DeptName varchar(30),
+        Description varchar(100),
+        primary key(Department_ID)
+);
+
+
+CREATE TABLE Employees (
+ Employee_ID varchar(10),
+ E_Name  varchar(30),
+ Gender  char,
+ Position varchar(30),
+ Contact decimal(10),
+ Address varchar(50),
+ Salary  int,
+ PRIMARY KEY (Employee_ID)
+);
+
+
+create table Doctors(
+        Doctor_ID varchar(10),
+        DName varchar(30),
+        Gender char,
+        Contact decimal(10),
+        Address varchar(50),
+        Speciality varchar(20),
+        Department_ID varchar(10),
+        Employee_ID varchar(10),
+        primary key(Doctor_ID),
+        foreign key(Department_ID) references Department(Department_ID)
+        on delete set default on update cascade,
+        foreign key(Employee_ID) references Employees(Employee_ID)
+        on delete set default on update cascade
+);
+
+
+create table Patient(
+        Patient_ID varchar(10),
+        Pname varchar(30),
+        Age int,
+        Gender char,
+        Contact decimal(10),
+        Address varchar(50),
+        Disease varchar(20),
+        BloodGroup varchar(5),
+        Doctor_ID varchar(10),
+        AppointmentType varchar(10),
+        primary key(Patient_ID),
+        foreign key(Doctor_ID) references Doctors(Doctor_ID)
+        on delete set default on update cascade
+);
+
+
+create table Room(
+        RoomNo varchar(4),
+        RoomType varchar(20),
+        primary key(RoomNo)
+); 
+
+
+create table Admitted_Patient(
+        Admission_ID varchar(10),
+        Patient_ID varchar(10),
+        RoomNo varchar(4),
+        AdmitDate date,
+        DischargeDate date,
+        primary key(Admission_ID),
+        foreign key(Patient_ID) references Patient(Patient_ID)
+        on delete set default on update cascade,
+        foreign key(RoomNo) references Room(RoomNo)
+        on delete set default on update cascade
+);
+
+
+create table Appointment(
+        AppointmentNo varchar(10),
+        P_ID varchar(10),
+        Doctor_ID varchar(10),
+        AppointmentDate date,
+        AppointmentTime time,
+        primary key(AppointmentNo),
+        foreign key (P_ID) references Patient(Patient_ID)
+        on delete set default on update cascade,
+        foreign key (Doctor_ID) references Doctors(Doctor_ID)
+        on delete set default on update cascade
+);
+
+
+create table MonthlyExpenditure(
+        Amount int,
+        Description varchar(100),
+        Dept_ID varchar(10),
+        Date date,
+        Expenditure_ID varchar(10),
+        primary key(Expenditure_ID),
+        foreign key(Dept_ID) references Department(Department_ID)
+        ON UPDATE CASCADE ON DELETE SET NULL
+);
+
+
+CREATE TABLE BILL(
+Bill_No varchar(10),
+P_ID varchar(10),
+Advance decimal,
+Lab_charges decimal,
+Room_charges decimal,
+Medicine_charges decimal,
+Operation_charges decimal,
+BILL_charges decimal,
+Medical_Insurance char(50),
+PRIMARY KEY (Bill_No),
+FOREIGN KEY (P_ID) REFERENCES Patient(Patient_ID)
+ON UPDATE CASCADE ON DELETE SET NULL
+);
+
+
+create table Record(
+        Record_ID varchar(10),
+        Diagnosis varchar(30),
+        Treatment varchar(100),
+        P_ID varchar(10),
+        Doctor_ID varchar(10),
+        AdmissionDate date,
+        Discharge date,
+        BillNo varchar(10),
+        primary key(Record_ID),
+        foreign key (P_ID) references Patient(Patient_ID)
+        on delete set default on update cascade,
+        foreign key (Doctor_ID) references Doctors(Doctor_ID)
+        on delete set default on update cascade,
+        foreign key (BillNo) references Bill(Bill_No)
+        on delete set default on update cascade
+);
+
+
+create table HeadDoctor(
+        Doctor_ID varchar(10),
+        Department_ID varchar(10),
+        primary key(Doctor_ID),
+        foreign key (Doctor_ID) references Doctors(Doctor_ID)
+        on delete set default on update cascade,
+        foreign key(Department_ID) references Department(Department_ID)
+        on delete set default on update cascade
+);
+
+
+ CREATE TABLE LabReport (
+ Lab_Report_No varchar(10),
+ P_ID varchar(10),
+ D_ID varchar(10),
+ Doctor_Name varchar(30),
+ Date date,
+ Diagnosis_Test_Name varchar(50),
+ Results varchar(100), 
+ Test_FEES int,
+ PRIMARY KEY (Lab_Report_No),
+ FOREIGN KEY (P_ID) REFERENCES Patient(Patient_ID)
+ ON UPDATE CASCADE ON DELETE SET NULL,
+ FOREIGN KEY (D_ID) REFERENCES Doctors(Doctor_ID)
+ ON UPDATE CASCADE ON DELETE SET NULL
+);
+
+
+CREATE TABLE Nurse(
+Nurse_ID varchar(10),
+Nurse_Name varchar(20),
+Duty varchar(50),
+Employee_ID varchar(10),
+D_ID varchar(10),
+Doctor_ID varchar(10),
+PRIMARY KEY (Nurse_ID),
+FOREIGN KEY (Employee_ID) REFERENCES Employees(Employee_ID)
+ON UPDATE CASCADE ON DELETE SET NULL,
+FOREIGN KEY (D_ID) REFERENCES Department(Department_ID)
+ON UPDATE CASCADE ON DELETE SET NULL,
+FOREIGN KEY (Doctor_ID) REFERENCES Doctors(Doctor_ID)
+ON UPDATE CASCADE ON DELETE SET NULL
+);
+
+
+CREATE TABLE FrontDeskStaff(
+Employee_ID varchar(10),
+E_Name varchar(20),
+Duty varchar(10),
+PRIMARY KEY (Employee_ID),
+FOREIGN KEY (Employee_ID) REFERENCES Employees(Employee_ID)
+ON UPDATE CASCADE ON DELETE SET NULL
+);
+
+
+CREATE TABLE EmergencyContact(
+R_ID varchar(10),
+P_ID varchar(10),
+Name varchar(20),
+Contact_No int,
+Address varchar(50),
+PRIMARY KEY (R_ID),
+FOREIGN KEY (P_ID) REFERENCES Patient(Patient_ID)
+ON UPDATE CASCADE ON DELETE SET NULL
+);
+
+
+CREATE TABLE Inventory(
+Inventory_ID varchar(10),
+Item_Name varchar(50),
+Item_Code int,
+Quantity int,
+Unit_Price int,
+Total_value int,
+Supplier_Name varchar(50),
+Expiry_Date date,
+Last_Updated date,
+Department_ID varchar(10),
+PRIMARY KEY (Inventory_ID),
+FOREIGN KEY (Department_ID) REFERENCES Department(Department_ID)
+ON UPDATE CASCADE ON DELETE SET NULL
+);
+
+
+CREATE TABLE Surgery_Patient(
+Surgery_Patient_ID varchar(10),
+Admission_ID varchar(10),
+Description varchar(100),
+RoomNo varchar(4),
+Record_No varchar(10),
+EmergencyContact varchar(10),
+SurgeryDate date,
+SurgeryTime time,
+PRIMARY KEY(Surgery_Patient_ID),
+FOREIGN KEY (RoomNo) REFERENCES Room(RoomNo)
+ ON UPDATE CASCADE ON DELETE SET NULL,
+FOREIGN KEY (Record_No) REFERENCES Record(Record_ID)
+ ON UPDATE CASCADE ON DELETE SET NULL,
+FOREIGN KEY (EmergencyContact) REFERENCES EmergencyContact(R_ID)
+ ON UPDATE CASCADE ON DELETE SET NULL,
+FOREIGN KEY (Admission_ID) REFERENCES Admitted_Patient(Admission_ID)
+ ON UPDATE CASCADE ON DELETE SET NULL
+);

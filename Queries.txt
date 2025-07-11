@@ -1,0 +1,385 @@
+﻿T-512
+  Queries
+
+
+1) Retrieve the total number of appointments for each doctor
+SELECT AppointmentDate, Doctor_ID, COUNT(*) AS TotalAppointments
+FROM Hospital.Appointment
+GROUP BY AppointmentDate, Doctor_ID
+ORDER BY AppointmentDate, Doctor_ID;
+
+
+
+
+2)Retrieve the names and contact information of patients with a medical history related to Migraine
+
+
+SELECT 
+    P.Pname AS Patient_Name,
+    P.Contact AS Patient_Contact
+FROM 
+    Hospital.Patient P
+WHERE 
+    P.Disease LIKE '%Migraine%';
+
+
+
+
+
+
+
+
+
+
+3)Retrieves the total bill amount paid by patients with insurance coverage .
+
+
+SELECT 
+    SUM(b.BILL_charges) AS Total_Bill_Amount
+FROM 
+    Hospital.BILL b
+JOIN 
+    Hospital.Patient p ON b.P_ID = p.Patient_ID
+WHERE 
+    b.Medical_Insurance IS NOT NULL;
+
+
+
+
+
+
+4)Retrieve the names and phone numbers of male patients with blood type O+ who are eligible (18+) for future blood donation
+
+
+SELECT 
+    p.Pname AS Patient_Name,
+    p.Contact AS Phone_Number
+FROM 
+    Hospital.Patient p
+WHERE 
+    p.Gender = 'M'
+    AND p.BloodGroup = 'O+'
+    AND p.Age >= 18;
+
+
+
+
+
+
+5)List of patients who are admitted on a particular date.
+
+
+SELECT 
+    p.Patient_ID,
+    p.Pname AS Patient_Name,
+    p.Address AS Patient_Address,
+    ap.Admission_ID,
+    ap.AdmitDate
+FROM 
+    Hospital.Patient p
+JOIN 
+    Hospital.Admitted_Patient ap ON p.Patient_ID = ap.Patient_ID
+WHERE 
+    ap.AdmitDate = '2024-05-08';
+
+
+
+
+6)Retrieve the names of doctors who have treated patients with cancer along with the number of cancer patients they have treated.
+
+
+SELECT d.dname, COUNT(*) AS cancer_patient_count
+FROM Hospital.patient p
+JOIN Hospital.doctors d ON p.doctor_id = d.doctor_id
+WHERE p.disease = 'Cancer'
+GROUP BY d.dname;
+
+
+
+
+        
+
+
+
+
+7)Calculate the average age of patients in each department.
+
+
+SELECT Department,
+       AVG(PATIENT.Age) AS AverageAge
+FROM Hospital.Department
+INNER JOIN Hospital.Doctors ON Department.Department_ID = DOCTORS.Department_ID
+INNER JOIN Hospital.PATIENT ON DOCTORS.Doctor_ID = PATIENT.Doctor_ID
+GROUP BY Department.Department_ID;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+8)Retrieves the total expenditure for each department for April along with the department details.
+SELECT
+        d.DeptName AS Department_Name,
+        SUM(me.Amount) AS Total_Expenditure
+FROM
+        Hospital.Department d
+LEFT JOIN
+        Hospital.MonthlyExpenditure me ON d.Department_ID = me.Dept_ID
+WHERE
+        EXTRACT(MONTH FROM me.Date) = 4
+GROUP BY
+        d.DeptName;
+ 
+9)Retrieves the average salary of doctors by their gender and specialization.
+SELECT
+        d.Speciality AS Specialization,
+        d.Gender AS Doctor_Gender,
+        AVG(e.Salary) AS Average_Salary
+FROM
+        Hospital.Doctors d
+JOIN
+        Hospital.Employees e ON d.Employee_ID = e.Employee_ID
+GROUP BY
+        d.Speciality, d.Gender;
+10)Retrieve all appointments scheduled by doctor with doc id DOC106.
+
+
+SELECT 
+    a.AppointmentNo,
+    a.AppointmentDate,
+    a.AppointmentTime,
+    p.Pname AS Patient_Name,
+    p.Age AS Patient_Age,
+    p.Gender AS Patient_Gender
+FROM 
+    Hospital.Appointment a
+JOIN 
+    Hospital.Patient p ON a.P_ID = p.Patient_ID
+JOIN 
+    Hospital.Doctors d ON a.Doctor_ID = d.Doctor_ID
+WHERE 
+    d.Doctor_ID = 'DOC106';
+
+
+
+
+
+
+11)Retrieve doctors with the most diverse range of patients' ages.
+
+
+SELECT 
+    d.Doctor_ID,
+    d.DName AS Doctor_Name,
+    MIN(p.Age) AS Min_Patient_Age,
+    MAX(p.Age) AS Max_Patient_Age,
+    MAX(p.Age) - MIN(p.Age) AS Age_Range
+FROM 
+    Hospital.Doctors d
+JOIN 
+    Hospital.Patient p ON d.Doctor_ID = p.Doctor_ID
+GROUP BY 
+    d.Doctor_ID, d.DName
+ORDER BY 
+    Age_Range DESC
+LIMIT 
+    1;
+
+
+
+
+
+
+12)Patient names and addresses, doctor names and specialties, bill charges, and the room numbers where cancer patients are admitted.
+
+
+SELECT DISTINCT
+    p.Pname AS Patient_Name,
+    p.Address AS Patient_Address,
+    d.DName AS Doctor_Name,
+    d.Speciality AS Doctor_Speciality,
+    b.BILL_charges AS Bill_Charges,
+    ap.RoomNo AS Room_Number
+FROM 
+    Hospital.Patient p
+JOIN 
+    Hospital.Doctors d ON p.Doctor_ID = d.Doctor_ID
+JOIN 
+    Hospital.Record r ON p.Patient_ID = r.P_ID
+JOIN 
+    Hospital.Admitted_Patient ap ON p.Patient_ID = ap.Patient_ID
+JOIN 
+    Hospital.BILL b ON p.Patient_ID = b.P_ID
+WHERE 
+    p.Disease LIKE '%Cancer%';
+
+
+
+
+
+
+13)Retrieve patients with the highest total expenditure on medications.
+
+
+SELECT 
+    p.Patient_ID,
+    p.Pname AS Patient_Name,
+    SUM(b.Medicine_charges) AS Total_Medication_Expenditure
+FROM 
+    Hospital.Patient p
+JOIN 
+    Hospital.BILL b ON p.Patient_ID = b.P_ID
+GROUP BY 
+    p.Patient_ID, p.Pname
+ORDER BY 
+    Total_Medication_Expenditure DESC
+LIMIT 1;
+
+
+
+
+
+
+14)Retrieve patients who have not attended any appointments.
+
+
+SELECT Patient_ID, Pname AS Patient_Name
+FROM Hospital.Patient
+LEFT JOIN Hospital.Appointment ON Patient.Patient_ID = Appointment.P_ID
+WHERE AppointmentNo IS NULL;
+
+
+
+
+
+
+15)Retrieve the highest and lowest salaries among doctors.
+SELECT 
+    MAX(CASE WHEN Position = 'Doctor' THEN Salary END) AS Highest_Doctor_Salary,
+    MIN(CASE WHEN Position = 'Doctor' THEN Salary END) AS Lowest_Doctor_Salary,
+    MAX(CASE WHEN Position != 'Doctor' THEN Salary END) AS Highest_Employee_Salary,
+    MIN(CASE WHEN Position != 'Doctor' THEN Salary END) AS Lowest_Employee_Salary
+FROM 
+    Hospital.Employees;
+
+
+
+
+
+
+16)Calculate the average age of patients in each blood group.
+SELECT BloodGroup, AVG(Age) AS Average_Age
+FROM Hospital.Patient
+GROUP BY BloodGroup;
+
+
+
+
+
+
+17)List all departments with their respective head doctors.
+SELECT Department.DeptName AS Department_Name, Doctors.DName AS Head_Doctor_Name
+FROM Hospital.Department
+LEFT JOIN Hospital.HeadDoctor ON Department.Department_ID = HeadDoctor.Department_ID
+LEFT JOIN Hospital.Doctors ON HeadDoctor.Doctor_ID = Doctors.Doctor_ID;
+
+
+
+
+
+
+18)Find doctors who have the highest number of appointments.
+SELECT Doctors.Doctor_ID, Doctors.DName AS Doctor_Name, COUNT(Appointment.AppointmentNo) AS Appointment_Count
+FROM Hospital.Doctors
+INNER JOIN Hospital.Appointment ON Doctors.Doctor_ID = Appointment.Doctor_ID
+GROUP BY Doctors.Doctor_ID, Doctors.DName
+ORDER BY Appointment_Count DESC
+LIMIT 1;
+
+
+19)Identify patients who have multiple appointments scheduled on the same day.
+SELECT P_ID, Pname AS Patient_Name, AppointmentDate AS Date, COUNT(*) AS Appointment_Count
+FROM Hospital.Appointment
+INNER JOIN Hospital.Patient ON Appointment.P_ID = Patient.Patient_ID
+GROUP BY P_ID, Pname, AppointmentDate
+HAVING COUNT(*) > 1;
+
+
+20)List departments with the highest and lowest monthly expenditures.
+
+
+SELECT Department.DeptName AS Department_Name, SUM(MonthlyExpenditure.Amount) AS Total_Expenditure
+FROM Hospital.Department
+INNER JOIN Hospital.MonthlyExpenditure ON Department.Department_ID = MonthlyExpenditure.Dept_ID
+GROUP BY Department.DeptName
+ORDER BY Total_Expenditure DESC
+LIMIT 1;
+
+
+SELECT Department.DeptName AS Department_Name, SUM(MonthlyExpenditure.Amount) AS Total_Expenditure
+FROM Hospital.Department
+INNER JOIN Hospital.MonthlyExpenditure ON Department.Department_ID = MonthlyExpenditure.Dept_ID
+GROUP BY Department.DeptName
+ORDER BY Total_Expenditure ASC
+LIMIT 1;
+
+
+21)Retrieve the names of nurses along with the patients they are assigned to and the names of doctors they work with in the Neurology department.
+
+
+SELECT n.Nurse_Name, p.Pname AS Patient_Name, d.DName AS Doctor_Name
+FROM Hospital.Nurse n
+JOIN Hospital.Patient p ON n.Doctor_ID = p.Doctor_ID
+JOIN Hospital.Doctors d ON n.Doctor_ID = d.Doctor_ID
+JOIN Hospital.Department dp ON n.D_ID = dp.Department_ID
+WHERE dp.DeptName = 'Neurology';
+
+
+22)Identify patients who have been admitted to the hospital multiple times in the past year.
+
+
+SELECT Admitted_Patient.Patient_ID, Patient.Pname AS Patient_Name, COUNT(*) AS Admission_Count
+FROM Hospital.Admitted_Patient
+INNER JOIN Hospital.Patient ON Admitted_Patient.Patient_ID = Patient.Patient_ID
+WHERE Admitted_Patient.AdmitDate >= CURRENT_DATE - INTERVAL '1 year'
+GROUP BY Admitted_Patient.Patient_ID, Patient.Pname
+HAVING COUNT(*) > 1;
+
+
+23)Find the names and positions of employees who are Front desk staff.
+
+
+SELECT DISTINCT e.E_Name, e.Position
+FROM Hospital.Employees e
+INNER JOIN Hospital.Employees e2 ON e.Employee_ID = e2.Employee_ID
+WHERE e.Position = 'Front Desk Staff';
+
+
+
+
+24)Identify patients who have not paid their bills yet.
+
+
+SELECT P.Patient_ID, P.Pname AS Patient_Name
+FROM Hospital.Patient P
+LEFT JOIN Hospital.BILL B ON P.Patient_ID = B.P_ID
+WHERE B.Bill_No IS NULL;
+
+
+25)Get the names of patients who were treated by a specific doctor and admitted after a certain date.
+
+
+SELECT DISTINCT p.Pname
+FROM Hospital.Record r
+JOIN Hospital.Patient p ON r.P_ID = p.Patient_ID
+WHERE r.Doctor_ID = 'DOC107' AND r.AdmissionDate > '2024-01-04';
